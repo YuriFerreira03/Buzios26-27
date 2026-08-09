@@ -6,10 +6,6 @@ const PUBLIC_PATHS = ["/login", "/auth"];
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
-/**
- * Renova o cookie de sessao a cada request e protege as rotas privadas.
- * IMPORTANTE: nao inserir logica entre createServerClient e getUser().
- */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -39,19 +35,24 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 
-  if (!user && !isPublic) {
+  /**
+   * Redirect preservando os cookies renovados pelo getUser().
+   * Sem isso, a sessao renovada se perde e o app entra em loop
+   * de redirecionamento entre / e /login.
+   */
+  const redirectTo = (pathnameTarget: string, keepNext = false) => {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
-  }
-
-  if (user && pathname === "/login") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = pathnameTarget;
     url.search = "";
-    return NextResponse.redirect(url);
-  }
+    if (keepNext) url.searchParams.set("next", pathname);
+
+    const redirect = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+    return redirect;
+  };
+
+  if (!user && !isPublic) return redirectTo("/login", true);
+  if (user && pathname === "/login") return redirectTo("/");
 
   return response;
 }
