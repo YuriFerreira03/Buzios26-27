@@ -1,8 +1,8 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-/** Rotas acessiveis sem sessao. */
-const PUBLIC_PATHS = ["/login", "/auth"];
+/** Rotas que nao exigem sessao. */
+const PUBLIC_PATHS = ["/login", "/cadastro", "/auth"];
 
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
@@ -35,24 +35,38 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 
-  /**
-   * Redirect preservando os cookies renovados pelo getUser().
-   * Sem isso, a sessao renovada se perde e o app entra em loop
-   * de redirecionamento entre / e /login.
-   */
-  const redirectTo = (pathnameTarget: string, keepNext = false) => {
-    const url = request.nextUrl.clone();
-    url.pathname = pathnameTarget;
-    url.search = "";
-    if (keepNext) url.searchParams.set("next", pathname);
+  let approved = false;
+  if (user) {
+    const { data } = await supabase
+      .from("users")
+      .select("approved")
+      .eq("id", user.id)
+      .maybeSingle();
+    approved = !!(data as { approved: boolean } | null)?.approved;
+  }
 
+  /** Redirect preservando os cookies renovados pelo getUser(). */
+  const redirectTo = (target: string) => {
+    const url = request.nextUrl.clone();
+    url.pathname = target;
+    url.search = "";
     const redirect = NextResponse.redirect(url);
-    response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+    response.cookies.getAll().forEach((c) => redirect.cookies.set(c));
     return redirect;
   };
 
-  if (!user && !isPublic) return redirectTo("/login", true);
-  if (user && pathname === "/login") return redirectTo("/");
+  // Sem sessao: so rotas publicas.
+  if (!user && !isPublic && pathname !== "/aguardando") return redirectTo("/login");
+
+  // Com sessao mas sem aprovacao: fica preso em /aguardando.
+  if (user && !approved && pathname !== "/aguardando" && !pathname.startsWith("/auth")) {
+    return redirectTo("/aguardando");
+  }
+
+  // Aprovado nao volta para telas de entrada.
+  if (user && approved && ["/login", "/cadastro", "/aguardando"].includes(pathname)) {
+    return redirectTo("/");
+  }
 
   return response;
 }

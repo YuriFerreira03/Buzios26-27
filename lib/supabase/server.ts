@@ -14,6 +14,7 @@ export type Profile = {
   pix_key: string | null;
   created_at: string;
   updated_at: string;
+  approved: boolean;
 };
 
 /**
@@ -59,5 +60,6 @@ export async function getCurrentUser() {
 
   const profile = data as Profile | null;
 
-  return profile ? { ...user, profile } : null;
+  return profile?.approved ? { ...user, profile } : null;
+
 }

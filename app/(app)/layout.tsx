@@ -6,8 +6,9 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
 
-  // Segunda camada de protecao (a primeira e o middleware).
-  // Sem perfil em public.users, a pessoa nao e do grupo.
+  // getCurrentUser so devolve perfil aprovado.
+  // Sem sessao ou sem aprovacao, o middleware ja redirecionou;
+  // esta linha e a segunda camada, caso ele seja contornado.
   if (!user) redirect("/login");
 
   return (
