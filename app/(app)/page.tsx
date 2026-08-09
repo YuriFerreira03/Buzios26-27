@@ -5,10 +5,13 @@ import { brl } from "@/lib/utils";
 export default async function DashboardPage() {
   const supabase = await createClient();
 
-  const [{ data: settings }, { data: balance }] = await Promise.all([
+  const [settingsRes, balanceRes] = await Promise.all([
     supabase.from("trip_settings").select("*").single(),
     supabase.from("v_common_fund_balance").select("*").single(),
   ]);
+
+  const settings = settingsRes.data as { countdown_target: string } | null;
+  const balance = balanceRes.data as { balance: number } | null;
 
   return (
     <div className="space-y-6">
@@ -26,7 +29,7 @@ export default async function DashboardPage() {
         </p>
       </section>
 
-      {/* Fase 2: próximo evento da programação e alertas fixados entram aqui. */}
+      {/* Fase 2: proximo evento da programacao e alertas fixados entram aqui. */}
     </div>
   );
 }

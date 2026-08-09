@@ -1,5 +1,3 @@
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,82 +5,69 @@
 @layer base {
   :root {
     /* Areia clara #FDF6EC */
-    --background: oklch(1 0 0);
+    --background: 35 81% 96%;
     /* Azul oceano escuro para texto */
-    --foreground: oklch(0.145 0 0);
+    --foreground: 198 60% 14%;
 
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
+    --card: 0 0% 100%;
+    --card-foreground: 198 60% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 198 60% 14%;
 
     /* #0B4F6C */
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
+    --primary: 198 82% 23%;
+    --primary-foreground: 35 81% 96%;
 
     /* #1B6B93 */
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
+    --secondary: 200 69% 34%;
+    --secondary-foreground: 35 81% 96%;
 
     /* #F5EFE6 */
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
+    --muted: 36 43% 93%;
+    --muted-foreground: 198 20% 40%;
 
     /* Dourado #D4AF37 */
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
+    --accent: 46 65% 52%;
+    --accent-foreground: 198 82% 15%;
 
-    --destructive: oklch(0.577 0.245 27.325);
+    --destructive: 0 72% 45%;
     --destructive-foreground: 35 81% 96%;
 
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
+    --border: 36 30% 86%;
+    --input: 36 30% 86%;
+    --ring: 46 65% 52%;
 
-    --radius: 0.625rem; /* rounded-2xl como padrao dos cards */ --chart-1: oklch(0.87 0 0); --chart-2: oklch(0.556 0 0); --chart-3: oklch(0.439 0 0); --chart-4: oklch(0.371 0 0); --chart-5: oklch(0.269 0 0); --sidebar: oklch(0.985 0 0); --sidebar-foreground: oklch(0.145 0 0); --sidebar-primary: oklch(0.205 0 0); --sidebar-primary-foreground: oklch(0.985 0 0); --sidebar-accent: oklch(0.97 0 0); --sidebar-accent-foreground: oklch(0.205 0 0); --sidebar-border: oklch(0.922 0 0); --sidebar-ring: oklch(0.708 0 0);
+    --radius: 1rem; /* rounded-2xl como padrao dos cards */
   }
 
   .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
+    --background: 198 55% 8%;
+    --foreground: 35 60% 94%;
+    --card: 198 45% 12%;
+    --card-foreground: 35 60% 94%;
+    --popover: 198 45% 12%;
+    --popover-foreground: 35 60% 94%;
+    --primary: 200 69% 45%;
+    --primary-foreground: 198 60% 10%;
+    --secondary: 198 40% 20%;
+    --secondary-foreground: 35 60% 94%;
+    --muted: 198 35% 16%;
+    --muted-foreground: 198 15% 68%;
+    --accent: 51 100% 50%;
+    --accent-foreground: 198 60% 10%;
+    --destructive: 0 62% 45%;
     --destructive-foreground: 35 60% 94%;
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --border: 198 30% 20%;
+    --input: 198 30% 20%;
+    --ring: 51 100% 50%;
   }
 
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
 
   body {
-    @apply antialiased bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     /* Gradiente sutil de "horizonte" */
     background-image: radial-gradient(120% 60% at 50% 0%, hsl(var(--secondary) / 0.10) 0%, transparent 60%);
     background-attachment: fixed;
@@ -92,13 +77,6 @@
 
   :focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
-  }
-  .theme {
-    --font-heading: var(--font-sans);
-    --font-sans: var(--font-sans);
-  }
-  html {
-    @apply font-sans;
   }
 }
 

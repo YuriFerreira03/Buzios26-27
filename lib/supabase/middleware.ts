@@ -1,9 +1,10 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import type { Database } from "@/types/database.types";
 
 /** Rotas acessiveis sem sessao. */
 const PUBLIC_PATHS = ["/login", "/auth"];
+
+type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
 /**
  * Renova o cookie de sessao a cada request e protege as rotas privadas.
@@ -12,7 +13,7 @@ const PUBLIC_PATHS = ["/login", "/auth"];
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient<Database>(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -20,7 +21,7 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: CookieToSet[]) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>

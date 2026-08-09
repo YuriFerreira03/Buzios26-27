@@ -33,17 +33,17 @@ export function LoginForm() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        // Primeira barreira da allowlist: nao cria usuario novo.
-        // A segunda barreira e o trigger handle_new_auth_user no banco.
+        // A allowlist e garantida pelo trigger handle_new_auth_user no banco:
+        // e-mail fora da lista faz o insert em auth.users falhar.
         shouldCreateUser: true,
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
-     if (error) {
+    if (error) {
       console.error("[login]", error);
-      const foraDaLista = error.status === 500 ||
-        error.message.toLowerCase().includes("database error");
+      const foraDaLista =
+        error.status === 500 || error.message.toLowerCase().includes("database error");
 
       toast.error(foraDaLista ? "E-mail fora da lista" : "Não foi possível enviar o link", {
         description: foraDaLista
