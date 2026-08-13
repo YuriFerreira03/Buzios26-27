@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Home, Wallet, ShoppingCart, Images, CalendarDays } from "lucide-react";
+import { Home, Wallet, ListChecks, Vote, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
   { href: "/", label: "Início", icon: Home },
   { href: "/financeiro", label: "Grana", icon: Wallet },
-  { href: "/compras", label: "Compras", icon: ShoppingCart },
-  { href: "/feed", label: "Feed", icon: Images },
+  { href: "/levar", label: "Levar", icon: ListChecks },
+  { href: "/enquetes", label: "Enquetes", icon: Vote },
   { href: "/programacao", label: "Roteiro", icon: CalendarDays },
 ] as const;
 

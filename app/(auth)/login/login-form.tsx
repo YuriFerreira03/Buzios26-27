@@ -8,9 +8,13 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2, Mail, Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Divisor, GoogleButton } from "@/components/auth/google-button";
 
 const schema = z.object({
-  email: z.string().min(1, "Informe seu e-mail.").email("E-mail inválido.")
+  email: z
+    .string()
+    .min(1, "Informe seu e-mail.")
+    .email("E-mail inválido.")
     .transform((v) => v.trim().toLowerCase()),
   password: z.string().min(1, "Informe sua senha."),
 });
@@ -22,15 +26,21 @@ const campo =
 
 export function LoginForm() {
   const router = useRouter();
-  const { register, handleSubmit, formState: { errors, isSubmitting } } =
-    useForm<FormData>({ resolver: zodResolver(schema) });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   async function onSubmit({ email, password }: FormData) {
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      toast.error("E-mail ou senha incorretos", { description: "Confira os dados e tente de novo." });
+      toast.error("E-mail ou senha incorretos", {
+        description: "Confira os dados e tente de novo.",
+      });
       return;
     }
 
@@ -39,32 +49,72 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-      <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium">Seu e-mail</label>
-        <div className="relative">
-          <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <input id="email" type="email" inputMode="email" autoComplete="email"
-            placeholder="voce@exemplo.com" className={campo} {...register("email")} />
-        </div>
-        {errors.email && <p role="alert" className="text-sm text-destructive">{errors.email.message}</p>}
-      </div>
+    <div className="space-y-4">
+      <GoogleButton />
 
-      <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium">Senha</label>
-        <div className="relative">
-          <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <input id="password" type="password" autoComplete="current-password"
-            placeholder="••••••••" className={campo} {...register("password")} />
-        </div>
-        {errors.password && <p role="alert" className="text-sm text-destructive">{errors.password.message}</p>}
-      </div>
+      <Divisor />
 
-      <button type="submit" disabled={isSubmitting}
-        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-primary-foreground transition hover:bg-secondary disabled:opacity-60">
-        {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
-        {isSubmitting ? "Entrando..." : "Entrar"}
-      </button>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        <div className="space-y-2">
+          <label htmlFor="email" className="text-sm font-medium">
+            Seu e-mail
+          </label>
+          <div className="relative">
+            <Mail
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+            <input
+              id="email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder="voce@exemplo.com"
+              className={campo}
+              {...register("email")}
+            />
+          </div>
+          {errors.email && (
+            <p role="alert" className="text-sm text-destructive">
+              {errors.email.message}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="password" className="text-sm font-medium">
+            Senha
+          </label>
+          <div className="relative">
+            <Lock
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+            <input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              placeholder="••••••••"
+              className={campo}
+              {...register("password")}
+            />
+          </div>
+          {errors.password && (
+            <p role="alert" className="text-sm text-destructive">
+              {errors.password.message}
+            </p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-primary-foreground transition hover:bg-secondary disabled:opacity-60"
+        >
+          {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
+          {isSubmitting ? "Entrando..." : "Entrar"}
+        </button>
+      </form>
 
       <p className="text-center text-sm text-muted-foreground">
         Primeira vez?{" "}
@@ -72,6 +122,6 @@ export function LoginForm() {
           Criar conta
         </Link>
       </p>
-    </form>
+    </div>
   );
 }

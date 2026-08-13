@@ -1,60 +1,42 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRealtime } from "@/hooks/use-realtime";
 import { brl } from "@/lib/utils";
-import type { RentInstallment } from "@/types/app";
+import { paraCentavos, paraReais } from "@/lib/split";
+import type { RentStatus } from "@/types/aluguel";
 
 const MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+const mesCurto = (iso: string) => MESES[Number(iso.split("-")[1]) - 1];
+const diaMes = (iso: string) => {
+  const [, m, d] = iso.split("-");
+  return `${d}/${m}`;
+};
 
-function mesExtenso(iso: string) {
-  const [ano, mes] = iso.split("-");
-  return `${MESES[Number(mes) - 1]}/${ano.slice(2)}`;
-}
-
-function diaMes(iso: string) {
-  const [, mes, dia] = iso.split("-");
-  return `${dia}/${mes}`;
-}
-
-export function MyRentCard({
-  userId,
-  inicial,
-}: {
-  userId: string;
-  inicial: RentInstallment[];
-}) {
-  const [parcelas, setParcelas] = useState(inicial);
-  const [salvando, setSalvando] = useState<string | null>(null);
+export function MyRentCard({ userId }: { userId: string }) {
+  const [parcelas, setParcelas] = useState<RentStatus[] | null>(null);
 
   const carregar = useCallback(async () => {
     const supabase = createClient();
     const { data } = await supabase
-      .from("rent_installments")
+      .from("v_rent_status")
       .select("*")
       .eq("user_id", userId)
       .order("reference_month");
-    if (data) setParcelas(data as RentInstallment[]);
+    setParcelas((data as RentStatus[] | null) ?? []);
   }, [userId]);
 
-  useRealtime(["rent_installments"], carregar);
-
-  async function darBaixa(id: string) {
-    setSalvando(id);
-    const supabase = createClient();
-    const { error } = await supabase.from("rent_installments").update({ paid: true }).eq("id", id);
-    setSalvando(null);
-
-    if (error) {
-      toast.error("Não deu para dar baixa", { description: error.message });
-      return;
-    }
-    toast.success("Parcela quitada");
+  useEffect(() => {
     carregar();
+  }, [carregar]);
+
+  useRealtime(["rent_installments", "rent_payments"], carregar);
+
+  if (parcelas === null) {
+    return <div className="h-28 animate-pulse rounded-2xl bg-muted" />;
   }
 
   if (parcelas.length === 0) {
@@ -62,9 +44,9 @@ export function MyRentCard({
       <div className="card-soft p-5">
         <p className="text-sm text-muted-foreground">Sua parte do aluguel</p>
         <p className="mt-2 text-sm">
-          As parcelas ainda não foram criadas.{" "}
+          Ainda não há aluguel configurado.{" "}
           <Link href="/financeiro" className="font-medium text-secondary underline underline-offset-4">
-            Configurar agora
+            Configurar
           </Link>
         </p>
       </div>
@@ -72,14 +54,15 @@ export function MyRentCard({
   }
 
   const aberta = parcelas.find((p) => !p.paid);
+  const restanteTotal = parcelas.reduce((s, p) => s + paraCentavos(p.restante), 0);
   const pagas = parcelas.filter((p) => p.paid).length;
 
-  if (!aberta) {
+  if (!aberta || restanteTotal <= 0) {
     return (
       <div className="card-soft flex items-center gap-3 p-5">
         <CheckCircle2 className="h-8 w-8 shrink-0 text-accent" aria-hidden />
         <div>
-          <p className="font-display font-semibold">Você está em dia</p>
+          <p className="font-display font-semibold">Aluguel em dia</p>
           <p className="text-sm text-muted-foreground">
             {pagas} de {parcelas.length} parcelas quitadas.
           </p>
@@ -88,38 +71,51 @@ export function MyRentCard({
     );
   }
 
+  const parcial = paraCentavos(aberta.pago) > 0;
+
   return (
-    <div className="card-soft p-5">
+    <Link href="/financeiro" className="card-soft block p-5 transition active:scale-[0.99]">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm text-muted-foreground">Sua próxima parcela</p>
+          <p className="text-sm text-muted-foreground">Próxima parcela do aluguel</p>
           <p className="mt-1 font-display text-2xl font-bold leading-none text-primary">
-            {brl(aberta.amount)}
+            {brl(aberta.restante)}
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
-            {mesExtenso(aberta.reference_month)} · vence {diaMes(aberta.due_date)}
+            <span className="capitalize">{mesCurto(aberta.reference_month)}</span> · vence{" "}
+            {diaMes(aberta.due_date)}
+            {parcial && ` · já pagou ${brl(aberta.pago)}`}
           </p>
         </div>
 
-        <button
-          onClick={() => darBaixa(aberta.id)}
-          disabled={salvando === aberta.id}
-          className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-secondary disabled:opacity-60"
-        >
-          {salvando === aberta.id && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
-          Dar baixa
-        </button>
+        <div className="shrink-0 text-right">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">falta ao todo</p>
+          <p className="font-display font-semibold tabular-nums">
+            {brl(paraReais(restanteTotal))}
+          </p>
+        </div>
       </div>
 
-      <div className="mt-4 flex gap-1.5" aria-label={`${pagas} de ${parcelas.length} parcelas pagas`}>
+      <div className="mt-4 flex gap-1.5">
         {parcelas.map((p) => (
           <span
             key={p.id}
-            title={mesExtenso(p.reference_month)}
-            className={`h-1.5 flex-1 rounded-full ${p.paid ? "bg-accent" : "bg-muted"}`}
-          />
+            title={mesCurto(p.reference_month)}
+            className={`h-1.5 flex-1 overflow-hidden rounded-full bg-muted`}
+          >
+            <span
+              className="block h-full rounded-full bg-accent"
+              style={{
+                width: `${
+                  paraCentavos(p.amount) > 0
+                    ? (paraCentavos(p.pago) / paraCentavos(p.amount)) * 100
+                    : 0
+                }%`,
+              }}
+            />
+          </span>
         ))}
       </div>
-    </div>
+    </Link>
   );
 }
