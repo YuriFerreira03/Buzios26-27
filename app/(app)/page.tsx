@@ -1,17 +1,22 @@
 import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import { CountdownHero } from "@/components/dashboard/countdown-hero";
-import { BalanceCard, type SaldoUsuario } from "@/components/dashboard/balance-card";
+import {
+  BalanceCard,
+  type SaldoUsuario,
+} from "@/components/dashboard/balance-card";
 import { MyRentCard } from "@/components/dashboard/my-rent-card";
 import { NoticesCard, type Notice } from "@/components/dashboard/notices-card";
-import { NextEventCard, type ScheduleItem } from "@/components/dashboard/next-event-card";
-import type { RentInstallment } from "@/types/app";
+import {
+  NextEventCard,
+  type ScheduleItem,
+} from "@/components/dashboard/next-event-card";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
   const user = await getCurrentUser();
   const hoje = new Date().toISOString().slice(0, 10);
 
-  const [settingsRes, saldoRes, noticesRes, scheduleRes, rentRes] = await Promise.all([
+  const [settingsRes, saldoRes, noticesRes, scheduleRes] = await Promise.all([
     supabase.from("trip_settings").select("*").single(),
     supabase
       .from("v_user_balances")
@@ -31,15 +36,16 @@ export default async function DashboardPage() {
       .order("day")
       .order("starts_at", { nullsFirst: false })
       .limit(1),
-    supabase.from("rent_installments").select("*").eq("user_id", user!.id).order("reference_month"),
   ]);
 
-  const settings = settingsRes.data as { countdown_target: string; house_name: string | null } | null;
+  const settings = settingsRes.data as {
+    countdown_target: string;
+    house_name: string | null;
+  } | null;
   const saldo = (saldoRes.data as SaldoUsuario | null) ?? null;
   const avisos = (noticesRes.data as Notice[] | null) ?? [];
-  const proximo = ((scheduleRes.data as ScheduleItem[] | null) ?? [])[0] ?? null;
-  const parcelas = (rentRes.data as RentInstallment[] | null) ?? [];
-
+  const proximo =
+    ((scheduleRes.data as ScheduleItem[] | null) ?? [])[0] ?? null;
   return (
     <div className="space-y-5">
       <CountdownHero
@@ -51,7 +57,7 @@ export default async function DashboardPage() {
 
       <BalanceCard userId={user!.id} inicial={saldo} />
 
-      <MyRentCard userId={user!.id} inicial={parcelas} />
+      <MyRentCard userId={user!.id} />
 
       <NextEventCard evento={proximo} />
     </div>
