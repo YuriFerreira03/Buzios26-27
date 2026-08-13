@@ -15,6 +15,7 @@ export type Profile = {
   created_at: string;
   updated_at: string;
   approved: boolean;
+  is_admin: boolean;
 };
 
 /**

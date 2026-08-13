@@ -3,6 +3,7 @@ import { LogOut, Lock } from "lucide-react";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/perfil/profile-form";
 import { PasswordForm } from "@/components/perfil/password-form";
+import { AdminMembers } from "@/components/perfil/admin-members";
 
 export const metadata: Metadata = { title: "Perfil · Réveillon Búzios" };
 
@@ -32,6 +33,8 @@ export default async function PerfilPage() {
         </div>
       </header>
 
+      {p.is_admin && <AdminMembers userId={p.id} />}
+
       <ProfileForm
         userId={p.id}
         inicial={{
@@ -50,8 +53,7 @@ export default async function PerfilPage() {
           <span className="min-w-0 flex-1 truncate text-sm">{p.email}</span>
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Não dá para trocar: é este e-mail que foi autorizado no grupo. Se precisar mudar,
-          fale com quem administra para liberar o novo.
+          Não dá para trocar: é este e-mail que foi autorizado no grupo.
         </p>
 
         {(temGoogle || temSenha) && (
