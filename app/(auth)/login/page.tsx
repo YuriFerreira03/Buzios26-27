@@ -22,9 +22,7 @@ export default function LoginPage() {
             <br />
             <span className="text-gold-neon">Búzios</span>
           </h1>
-          <p className="mt-4 text-sm text-sand-100/90">
-            Grupo fechado. Só os oito entram.
-          </p>
+          <p className="mt-4 text-sm text-sand-100/90">Grupo fechado.</p>
         </header>
 
         <div className="card-soft p-6">
