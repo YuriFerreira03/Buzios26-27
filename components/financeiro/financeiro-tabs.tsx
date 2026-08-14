@@ -14,10 +14,12 @@ type Aba = "despesas" | "saldos" | "aluguel";
 
 export function FinanceiroTabs({
   userId,
+  isAdmin,
   membros,
   totalCasa,
 }: {
   userId: string;
+  isAdmin: boolean;
   membros: Member[];
   totalCasa: number;
 }) {
@@ -72,6 +74,7 @@ export function FinanceiroTabs({
       {aba === "despesas" && (
         <ExpensesPanel
           userId={userId}
+          isAdmin={isAdmin}
           membros={membros}
           despesas={despesas}
           divisoes={divisoes}

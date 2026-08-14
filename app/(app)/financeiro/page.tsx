@@ -15,7 +15,9 @@ export default async function FinanceiroPage() {
   ]);
 
   const membros = (membrosRes.data as Member[] | null) ?? [];
-  const totalCasa = Number((settingsRes.data as { house_total: number } | null)?.house_total ?? 0);
+  const totalCasa = Number(
+    (settingsRes.data as { house_total: number } | null)?.house_total ?? 0,
+  );
 
   return (
     <div className="space-y-6">
@@ -26,7 +28,12 @@ export default async function FinanceiroPage() {
         </p>
       </header>
 
-      <FinanceiroTabs userId={user!.id} membros={membros} totalCasa={totalCasa} />
+      <FinanceiroTabs
+        userId={user!.id}
+        isAdmin={user!.profile.is_admin}
+        membros={membros}
+        totalCasa={totalCasa}
+      />
     </div>
   );
 }
